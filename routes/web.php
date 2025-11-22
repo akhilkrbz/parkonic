@@ -14,3 +14,4 @@ Route::get('/sessionsByBuilding', [Dashboard::class, 'sessionsByBuilding'])->nam
 
 Route::get('/sessions_report', [ReportController::class, 'sessionsReport'])->name('sessions_report');
 Route::get('/sessionsReportFilter', [ReportController::class, 'sessionsReportFilter'])->name('sessionsReportFilter');
+Route::get('/exportSessionsReport', [ReportController::class, 'exportSessionsReport'])->name('exportSessionsReport');

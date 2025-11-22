@@ -90,4 +90,106 @@ class ReportController extends Controller
             // return redirect()->back()->with('error', $th->getMessage());
         }
     }
+
+    //exportSessionsReport
+    public function exportSessionsReport(Request $request)
+    {
+        try {
+            $formData = $request->all();
+
+            $from_date      = $formData['from_date'] ?? null;
+            $to_date        = $formData['to_date'] ?? null;
+            $location_id    = $formData['location'] ?? null;
+            $building_id    = $formData['building'] ?? null;
+            $status         = $formData['status'] ?? null;
+
+            // Fetch filtered parking sessions based on the provided criteria
+            $query = ParkingSession::query();
+
+            $query = $query->with(['location', 'building', 'entryAccessPoint', 'exitAccessPoint',  'vehicleMaster']);
+
+            if ($location_id != 'All' && $location_id) {
+                $query->where('location_id', $location_id);
+            }
+
+            if ($building_id != 'All' && $building_id) {
+                $query->where('building_id', $building_id);
+            }
+
+            if ($from_date) {
+                $query->whereDate('in_time', '>=', $from_date);
+            }
+
+            if ($to_date) {
+                $query->whereDate('in_time', '<=', $to_date);
+            }
+
+            if ($status != 'All' && is_numeric($status)) {
+                $statusInt = (int) $status;
+                $query->where('status', $statusInt);
+            }
+
+            $parkingSessions = $query->get();
+
+            // Generate CSV
+            $filename = 'sessions_report_' . date('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+
+            $columns = ['Sl.No.', 'In Time', 'Out Time', 'Location', 'Building', 'Entry Access Point Name', 'Exit Access Point Name', 'Plate', 'Status', 'Duration'];
+
+            $callback = function() use ($parkingSessions, $columns) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+
+                foreach ($parkingSessions as $key => $session) {
+
+                    $duration = 'N/A';
+                    if($session->status == 2 && $session->out_time) {
+                            
+                        $totalMinutes = $session->out_time->diffInMinutes($session->in_time);
+                        $hours = intdiv($totalMinutes, 60);
+                        $mins = $totalMinutes % 60;
+                        
+                        $duration = '';
+                        if ($hours > 0) {
+                            $duration .= $hours . ' ' . ($hours === 1 ? 'hr' : 'hrs');
+                        }
+                        if ($mins > 0) {
+                            if ($duration !== '') {
+                                $duration .= ' ';
+                            }
+                            $duration .= $mins . ' min';
+                        }
+                        if ($duration === '') {
+                            $duration = '0 min';
+                        }
+                    }
+
+                    $row = [
+                        $key + 1,
+                        $session->in_time->format('d M Y, h:i A'),
+                        $session->out_time ? $session->out_time->format('d M Y, h:i A') : 'N/A',
+                        $session->location->name,
+                        $session->building->name,
+                        $session->entryAccessPoint->name,
+                        $session->exitAccessPoint ? $session->exitAccessPoint->name : 'N/A',
+                        $session->vehicleMaster->plate_code.' '.$session->vehicleMaster->plate_number.' '.$session->vehicleMaster->emirates,
+                        $session->status == 1 ? 'Active' : 'Closed',
+                        $duration
+                        
+                    ];
+                    fputcsv($file, $row);
+                }
+                fclose($file);
+            };
+            return response()->stream($callback, 200, $headers);
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+            // return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
+
 }

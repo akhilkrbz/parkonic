@@ -17,6 +17,7 @@
                         <div class="card">
                             <div class="card-body">
                                 <h4 class="card-title">Sessions Report</h4>
+                                <button type="button" class="btn btn-primary mb-2 float-right exportReportBtn">Export Report</button>
                                 <p class="card-description">
 
                                 </p>
@@ -130,6 +131,17 @@
 
             // Auto-submit the filter form on page load
             $(".filterForm").trigger('submit');
+
+
+            // Export Report Button Click
+            $(document).on('click', '.exportReportBtn', function() {
+                var form = $(".filterForm");
+                var url = '{{ route("exportSessionsReport") }}';
+                var formData = form.serialize();
+                
+                // Redirect to export URL with query parameters
+                window.location.href = url + '?' + formData;
+            });
 
         });
     </script>
