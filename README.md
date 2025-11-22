@@ -6,21 +6,21 @@ MySQL version: 10.4.28-MariaDB
 
 
 Setup instructions : 
-    - Create database named: parking_reports_demo
-    - Import the SQL file. (I created migration files also for a reference).
-    - Now I directly imported the sql file because it was small sized file. For large sized files we can use MySQL CLI for import.
-    - Clone the git project and do composer install
-    - Update the .env file with databasename, username and password. Providing my local connection env details:
+1. Create database named: parking_reports_demo
+2. Import the SQL file. (I created migration files also for a reference).
+3. Now I directly imported the sql file because it was small sized file. For large sized files we can use MySQL CLI for import.
+4. Clone the git project and do composer install
+5. Update the .env file with databasename, username and password. Providing my local connection env details:
         DB_CONNECTION=mysql
         DB_HOST=127.0.0.1
         DB_PORT=3306
         DB_DATABASE=parking_reports_demo
         DB_USERNAME=root
         DB_PASSWORD=
-    - Open terminal and do 'php artisan key:generate' for new application key encryption generation.
-    - Open terminal and run below artisan commands:
-        1. php artisan optimize (For clear and generate caches for config, events, views and routes).
-        2. php artisan serve (For run the laravel app. Use http://127.0.0.1:8000 in browser to see the platform).
+6. Open terminal and do 'php artisan key:generate' for new application key encryption generation.
+7. Open terminal and run below artisan commands:
+    1. php artisan optimize (For clear and generate caches for config, events, views and routes).
+    2. php artisan serve (For run the laravel app. Use http://127.0.0.1:8000 in browser to see the platform).
 
     
 Assumptions made:
