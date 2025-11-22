@@ -38,8 +38,8 @@ class Dashboard extends Controller
     public function index()
     {
         try {
-            $locations = Location::all();
-            $buildings = Building::all();
+            $locations = Location::withCount('parkingSessions')->get();
+            $buildings = Building::withCount('parkingSessions')->get();
             $filterAction = route('dashboardSummary');
             return view('dashboard.index', compact('locations', 'buildings', 'filterAction'));
         } catch (\Throwable $th) {
@@ -87,7 +87,7 @@ class Dashboard extends Controller
                 }
 
                 if ($from->greaterThan($to)) {
-                    // swap
+                    // swap the dates
                     [$from, $to] = [$to, $from];
                 }
 
@@ -129,7 +129,6 @@ class Dashboard extends Controller
                 $total_closed_sessions = (clone $parkingSessionsQuery)->where('status', 2)->count();
             }
 
-
             //Average Parking Duration
             $avg_parking_duration = 0;
             $avg_parking_duration_formatted = 'N/A';
@@ -167,12 +166,12 @@ class Dashboard extends Controller
 
             return response()->json(
                 [
-                'status'                => 'success', 
-                'message'               => 'Dashboard Summary Fetched Successfully',
-                'total_active_sessions' => $total_active_sessions,
-                'total_closed_sessions' => $total_closed_sessions,
-                'avg_parking_duration_formatted' => $avg_parking_duration_formatted,
-                'top_vehicle' => $top_vehicle,
+                'status'                            => 'success', 
+                'message'                           => 'Dashboard Summary Fetched Successfully',
+                'total_active_sessions'             => $total_active_sessions,
+                'total_closed_sessions'             => $total_closed_sessions,
+                'avg_parking_duration_formatted'    => $avg_parking_duration_formatted,
+                'top_vehicle'                       => $top_vehicle,
             ],
             200);
         } catch (\Throwable $th) {
@@ -354,10 +353,10 @@ class Dashboard extends Controller
 
             return response()->json(
                 [
-                'status'        => 'success',
-                'message'       => 'Sessions by Building Data Fetched Successfully',
-                'building_names' => $buildingNames,
-                'session_counts' => $sessionCounts,
+                'status'            => 'success',
+                'message'           => 'Sessions by Building Data Fetched Successfully',
+                'building_names'    => $buildingNames,
+                'session_counts'    => $sessionCounts,
             ],
             200);
         } catch (\Throwable $th) {

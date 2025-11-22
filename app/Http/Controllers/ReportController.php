@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
+    // Detailed report of sessions
     public function sessionsReport()
     {
         try {
@@ -22,7 +23,7 @@ class ReportController extends Controller
         }
     }
 
-    //sessionsReportFilter
+    //sessions Report Filter
     public function sessionsReportFilter(Request $request)
     {
         try {
