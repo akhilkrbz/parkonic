@@ -41,14 +41,14 @@
 					<div class="container">
 						<ul class="nav page-navigation">
 							<li class="nav-item">
-								<a class="nav-link" href="index.html">
+								<a class="nav-link" href="{{ route('dashboard') }}">
 									<i class="mdi mdi-file-document-box menu-icon"></i>
 									<span class="menu-title">Dashboard</span>
 								</a>
 							</li>
 							
 							<li class="nav-item">
-								<a href="pages/forms/basic_elements.html" class="nav-link">
+								<a href="{{ route('sessions_report') }}" class="nav-link">
 									<i class="mdi mdi-chart-areaspline menu-icon"></i>
 									<span class="menu-title">Sessions Report</span>
 									<i class="menu-arrow"></i>
