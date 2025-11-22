@@ -19,6 +19,7 @@ class Dashboard extends Controller
      */
     private function formatDuration($minutes)
     {
+        $minutes = $minutes*(-1);
         $hours = intdiv($minutes, 60);
         $mins = $minutes % 60;
 

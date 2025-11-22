@@ -13,7 +13,7 @@
     <td>
         @if($session->status == 2 && $session->out_time)
             @php
-                $totalMinutes = $session->out_time->diffInMinutes($session->in_time);
+                $totalMinutes = $session->out_time->diffInMinutes($session->in_time)*(-1);
                 $hours = intdiv($totalMinutes, 60);
                 $mins = $totalMinutes % 60;
                 
