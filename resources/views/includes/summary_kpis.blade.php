@@ -39,4 +39,16 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-lg-3 d-flex grid-margin stretch-card">
+            <div class="card sale-visit-statistics-border" style="background-color: #74c5ed !important;">
+                <div class="card-body">
+                    <h3 class="text-dark mb-2 font-weight-bold active_closed_percent">N/A</h3>
+                    <h4 class="card-title mb-2"> Active vs closed sessions percentages</h4>
+                    <small class="text-muted"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

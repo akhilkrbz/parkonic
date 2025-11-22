@@ -66,6 +66,7 @@
 						$(".total_closed_sessions").text(response.total_closed_sessions);
 						$(".avg_parking_duration_formatted").text(response.avg_parking_duration_formatted);
 						$(".top_vehicle").html(`Vehicle No. <b>${response.top_vehicle.plate}</b><br> No. of Sessions: <b>${response.top_vehicle.session_count}</b>`);
+						$(".active_closed_percent").text(response.active_closed_percent);
 					} else {
 						console.error('Error fetching dashboard summary:', response.message);
 					}

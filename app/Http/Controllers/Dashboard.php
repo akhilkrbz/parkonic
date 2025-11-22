@@ -163,6 +163,16 @@ class Dashboard extends Controller
                 $top_vehicle_sessions = $topVehicleRecord->session_count;
             }
 
+            //To calculate active vs closed sessions percentages
+            $total_sessions = $total_active_sessions + $total_closed_sessions;
+            if($total_sessions > 0) {
+                $active_percent = round(($total_active_sessions / $total_sessions) * 100, 2);
+                $closed_percent = round(($total_closed_sessions / $total_sessions) * 100, 2);
+                $active_closed_percent = 'Active: '.$active_percent.'% | Closed: '.$closed_percent.'%';
+            } else {
+                $active_closed_percent = 'N/A';
+            }
+
 
             return response()->json(
                 [
@@ -172,6 +182,7 @@ class Dashboard extends Controller
                 'total_closed_sessions'             => $total_closed_sessions,
                 'avg_parking_duration_formatted'    => $avg_parking_duration_formatted,
                 'top_vehicle'                       => $top_vehicle,
+                'active_closed_percent'             => $active_closed_percent
             ],
             200);
         } catch (\Throwable $th) {
