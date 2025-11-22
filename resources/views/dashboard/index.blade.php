@@ -57,11 +57,11 @@
 
 				</div>
 
-				@include('includes.hourly_session_chart')
+				<div class="row">
+					@include('includes.hourly_session_chart')
 
-
-				
-
+					@include('includes.sessions_by_building_chart')
+				</div>
 			</div>
 			<!-- content-wrapper ends -->
 			<!-- partial:partials/_footer.html -->
@@ -213,7 +213,7 @@
 				}
 				var barChartCanvas = $("#dailyHourlySessionTracker").get(0).getContext("2d");
 				window.hourlyChart = new Chart(barChartCanvas, {
-					type: 'bar',
+					type: 'line',
 					data: hourlyChartData,
 					options: hourlyChartOptions
 				});
@@ -223,9 +223,111 @@
 		// Load hourly data on initial page load
 		loadHourlyData();
 
+		// Load building sessions data
+		function loadBuildingData() {
+			var formData = $(".filterForm").serialize();
+			$.ajax({
+				type: "GET",
+				url: '{{ route("sessionsByBuilding") }}',
+				data: formData,
+				success: function(response) {
+					if(response.status === 'success') {
+						updateBuildingChart(response.building_names, response.session_counts);
+					} else {
+						console.error('Error fetching building data:', response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error(error);
+				}
+			});
+		}
+
+		// Update the building sessions chart
+		function updateBuildingChart(buildingNames, sessionCounts) {
+			var buildingChartData = {
+				labels: buildingNames,
+				datasets: [{
+					label: 'Session Count',
+					data: sessionCounts,
+					backgroundColor: '#ff6b6b',
+					borderColor: '#ff6b6b',
+					borderWidth: 1,
+					fill: false
+				}]
+			};
+
+			var buildingChartOptions = {
+				scales: {
+					xAxes: [{
+						barPercentage: 0.8,
+						position: 'bottom',
+						display: true,
+						gridLines: {
+							display: false,
+							drawBorder: false,
+						},
+						ticks: {
+							display: true,
+						}
+					}],
+					yAxes: [{
+						display: true,
+						gridLines: {
+							drawBorder: false,
+							display: true,
+							color: "#f0f3f6",
+							borderDash: [8, 4],
+						},
+						ticks: {
+							beginAtZero: true,
+							stepSize: 1,
+							callback: function(value) {
+								// Only show integer values
+								if (Number.isInteger(value)) {
+									return value;
+								}
+								return '';
+							}
+						},
+					}]
+				},
+				legend: {
+					display: false
+				},
+				tooltips: {
+					backgroundColor: 'rgba(0, 0, 0, 1)',
+				},
+				plugins: {
+					datalabels: {
+						display: false,
+						align: 'center',
+						anchor: 'center'
+					}
+				}
+			};
+
+			if ($("#sessionsByBuildingChart").length) {
+				// Destroy existing chart if it exists
+				if (window.buildingChart) {
+					window.buildingChart.destroy();
+				}
+				var barChartCanvas = $("#sessionsByBuildingChart").get(0).getContext("2d");
+				window.buildingChart = new Chart(barChartCanvas, {
+					type: 'bar',
+					data: buildingChartData,
+					options: buildingChartOptions
+				});
+			}
+		}
+
+		// Load building data on initial page load
+		loadBuildingData();
+
 		// Reload hourly data when filter form is submitted
 		$(".filterForm").on("submit", function(e) {
 			loadHourlyData();
+			loadBuildingData();
 		});
 	});
 </script>

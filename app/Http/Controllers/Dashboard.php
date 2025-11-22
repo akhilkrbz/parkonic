@@ -269,4 +269,98 @@ class Dashboard extends Controller
             return response()->json(['status' => 'error', 'message' => $th->getMessage()], 500);
         }
     }
+
+    // Sessions by Building Chart Data
+    public function sessionsByBuilding(Request $request)
+    {
+        try {
+            $formData = $request->all();
+
+            $validator = Validator::make($formData, [
+                'from_date'     => 'nullable|date',
+                'to_date'       => 'nullable|date',
+                'location_id'   => 'nullable',
+                'building_id'   => 'nullable',
+                'status'        => 'nullable',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+            }
+
+            $from_date      = $formData['from_date'] ?? null;
+            $to_date        = $formData['to_date'] ?? null;
+            $location_id    = $formData['location'] ?? null;
+            $building_id    = $formData['building'] ?? null;
+            $status         = $formData['status'] ?? null;
+
+            // Build base query
+            $parkingSessionsQuery = ParkingSession::query();
+
+            // Parse and apply date filters
+            if (!empty($from_date) && !empty($to_date)) {
+                try {
+                    $from   = Carbon::parse($from_date);
+                    $to     = Carbon::parse($to_date);
+                } catch (\Exception $e) {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid date format'], 422);
+                }
+
+                if ($from->greaterThan($to)) {
+                    [$from, $to] = [$to, $from];
+                }
+
+                $parkingSessionsQuery->whereBetween('in_time', [$from->toDateTimeString(), $to->toDateTimeString()]);
+            } else {
+                if (!empty($from_date)) {
+                    try { $from = Carbon::parse($from_date); } catch (\Exception $e) { return response()->json(['status'=>'error','message'=>'Invalid from_date'],422); }
+                    $parkingSessionsQuery->where('in_time', '>=', $from->toDateTimeString());
+                }
+
+                if (!empty($to_date)) {
+                    try { $to = Carbon::parse($to_date); } catch (\Exception $e) { return response()->json(['status'=>'error','message'=>'Invalid to_date'],422); }
+                    $parkingSessionsQuery->where('in_time', '<=', $to->toDateTimeString());
+                }
+            }
+
+            if ($location_id != 'All' && !is_null($location_id)) {
+                $parkingSessionsQuery->where('location_id', $location_id);
+            }
+
+            if ($building_id != 'All' && !is_null($building_id)) {
+                $parkingSessionsQuery->where('building_id', $building_id);
+            }
+
+            if (!is_null($status) && is_numeric($status)) {
+                $parkingSessionsQuery->where('status', (int)$status);
+            }
+
+            // Group by building
+            $buildingData = (clone $parkingSessionsQuery)
+                ->join('buildings', 'parking_sessions.building_id', '=', 'buildings.id')
+                ->selectRaw('buildings.id, buildings.name, COUNT(parking_sessions.id) as session_count')
+                ->groupBy('buildings.id', 'buildings.name')
+                ->orderByDesc('session_count')
+                ->get();
+
+            // Extract building names and session counts
+            $buildingNames = [];
+            $sessionCounts = [];
+            foreach ($buildingData as $record) {
+                $buildingNames[] = $record->name;
+                $sessionCounts[] = $record->session_count;
+            }
+
+            return response()->json(
+                [
+                'status'        => 'success',
+                'message'       => 'Sessions by Building Data Fetched Successfully',
+                'building_names' => $buildingNames,
+                'session_counts' => $sessionCounts,
+            ],
+            200);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 'error', 'message' => $th->getMessage()], 500);
+        }
+    }
 }
