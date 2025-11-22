@@ -9,7 +9,7 @@
     <td>{{ $session->entryAccessPoint->name }}</td>
     <td>{{ $session->exitAccessPoint->name ?? 'N/A' }}</td>
     <td>{{ $session->vehicleMaster->plate_code.' '.$session->vehicleMaster->plate_number.' '.$session->vehicleMaster->emirates }}</td>
-    <td>{{ $session->status == 1 ? 'Active' : 'Closed' }}</td>
+    <td>{!! $session->status == 1 ? '<span style="color:green;">Active</span>' : '<span style="color:red;">Closed</span>' !!}</td>
     <td>
         @if($session->status == 2 && $session->out_time)
             @php
