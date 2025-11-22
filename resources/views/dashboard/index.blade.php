@@ -57,6 +57,11 @@
 
 				</div>
 
+				@include('includes.hourly_session_chart')
+
+
+				
+
 			</div>
 			<!-- content-wrapper ends -->
 			<!-- partial:partials/_footer.html -->
@@ -110,6 +115,118 @@
 
 		// Auto-submit the filter form on page load
 		$(".filterForm").trigger('submit');
+
+		// Load hourly session data on filter change
+		function loadHourlyData() {
+			var formData = $(".filterForm").serialize();
+			$.ajax({
+				type: "GET",
+				url: '{{ route("dailyHourlySessionTracker") }}',
+				data: formData,
+				success: function(response) {
+					if(response.status === 'success') {
+						updateHourlyChart(response.data);
+					} else {
+						console.error('Error fetching hourly data:', response.message);
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error(error);
+				}
+			});
+		}
+
+		// Update the chart with new data
+		function updateHourlyChart(data) {
+			// Create hour labels (0, 1, 2, ..., 23)
+			var hourLabels = [];
+			for (var i = 0; i < 24; i++) {
+				hourLabels.push(i);
+			}
+
+			var hourlyChartData = {
+				labels: hourLabels,
+				datasets: [{
+					label: 'Sessions Started',
+					data: data,
+					backgroundColor: '#464dee',
+					borderColor: '#464dee',
+					borderWidth: 1,
+					fill: false
+				}]
+			};
+
+			var hourlyChartOptions = {
+				scales: {
+					xAxes: [{
+						barPercentage: 0.8,
+						position: 'bottom',
+						display: true,
+						gridLines: {
+							display: false,
+							drawBorder: false,
+						},
+						ticks: {
+							display: true,
+						}
+					}],
+					yAxes: [{
+						display: true,
+						gridLines: {
+							drawBorder: false,
+							display: true,
+							color: "#f0f3f6",
+							borderDash: [8, 4],
+						},
+						ticks: {
+							beginAtZero: true,
+							stepSize: 1,
+							callback: function(value) {
+								// Only show integer values
+								if (Number.isInteger(value)) {
+									return value;
+								}
+								return '';
+							}
+						},
+					}]
+				},
+				legend: {
+					display: false
+				},
+				tooltips: {
+					backgroundColor: 'rgba(0, 0, 0, 1)',
+				},
+				plugins: {
+					datalabels: {
+						display: false,
+						align: 'center',
+						anchor: 'center'
+					}
+				}
+			};
+
+			if ($("#dailyHourlySessionTracker").length) {
+				// Destroy existing chart if it exists
+				if (window.hourlyChart) {
+					window.hourlyChart.destroy();
+				}
+				var barChartCanvas = $("#dailyHourlySessionTracker").get(0).getContext("2d");
+				window.hourlyChart = new Chart(barChartCanvas, {
+					type: 'bar',
+					data: hourlyChartData,
+					options: hourlyChartOptions
+				});
+			}
+		}
+
+		// Load hourly data on initial page load
+		loadHourlyData();
+
+		// Reload hourly data when filter form is submitted
+		$(".filterForm").on("submit", function(e) {
+			loadHourlyData();
+		});
 	});
 </script>
 
