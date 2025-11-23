@@ -36,6 +36,7 @@ Assumptions made:
 5. In sessions report: Export to CSV option is added.
 6. Pagination is added for session report. Pagination links will be visible if there is more than 25 rows.
 7. In dashboard, total sessions per location and building will not be based on filter. It is the total sessions count in each location / building.
+8. I have added indexes to in_time, out_time, and status columns in  parking_sessions table.
 
 
 The URL(s) to access:
